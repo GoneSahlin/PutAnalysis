@@ -1,11 +1,13 @@
 import pandas as pd
 
 
-def clean_df(df):
+def clean_df(df: pd.DataFrame):
   """Cleans DataFrame."""
   df["chg"] = df["Close"] - df["Close"].shift(1)
 
-  df["percent_chg"] = df["delta"] / df["Close"].shift(1)
+  df["percent_chg"] = df["chg"] / df["chg"].shift(1)
+
+  df.dropna()
 
   return df
 
@@ -20,4 +22,6 @@ def find_pattern(df):
   Returns:
     pattern(list): dates with reoccurring changes    
   """
-  pass
+  pattern = []
+
+  return pattern

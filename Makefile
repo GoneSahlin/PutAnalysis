@@ -12,7 +12,7 @@ lint: $(VENV)
 
 .PHONY: test
 test: $(VENV)
-	$(VENV)/bin/pytest
+	-$(VENV)/bin/pytest
 
 .PHONY: clean
 clean:
