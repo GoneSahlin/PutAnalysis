@@ -1,12 +1,17 @@
 import pandas as pd
+from datetime import date
 
 
 def clean_df(df: pd.DataFrame):
   """Cleans DataFrame."""
   # calculate percent change
-  df["prev_close"] = df["Close"].shift(1)
-  df["percent_chg"] = (df["Close"] - df["prev_close"]) / df["prev_close"]
+  prev_close = df["Close"].shift(1)
+  df["percent_chg"] = (df["Close"] - prev_close) / prev_close
 
+  # format date column
+  df["Date"] = df["Date"].apply(date.fromisoformat)
+
+  # delete rows with missing data
   df.dropna(inplace=True)
 
   return df
