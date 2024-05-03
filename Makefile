@@ -1,14 +1,18 @@
 VENV = .venv
 
-$(VENV): requirements.txt
+$(VENV): setup.cfg
 	rm -rf $(VENV)
 	python3 -m venv $(VENV)
-	$(VENV)/bin/pip install -r requirements.txt
+	$(VENV)/bin/pip install -e .[dev]
 	touch $(VENV)
 
 .PHONY: lint
 lint: $(VENV)
 	-$(VENV)/bin/flake8 --exclude $(VENV)
+
+.PHONY: test
+test: $(VENV)
+	$(VENV)/bin/pytest
 
 .PHONY: clean
 clean:
