@@ -1,0 +1,1 @@
+Running analysis on the stock market, particularly to find reoccurring decreases in stock prices for potential puts.
