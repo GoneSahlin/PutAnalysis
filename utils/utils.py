@@ -3,16 +3,16 @@ import pandas as pd
 
 def clean_df(df: pd.DataFrame):
   """Cleans DataFrame."""
-  df["chg"] = df["Close"] - df["Close"].shift(1)
+  # calculate percent change
+  df["prev_close"] = df["Close"].shift(1)
+  df["percent_chg"] = (df["Close"] - df["prev_close"]) / df["prev_close"]
 
-  df["percent_chg"] = df["chg"] / df["chg"].shift(1)
-
-  df.dropna()
+  df.dropna(inplace=True)
 
   return df
 
 
-def find_pattern(df):
+def find_pattern(df: pd.DataFrame):
   """
   Find patterns in stock prices.
 
@@ -22,6 +22,10 @@ def find_pattern(df):
   Returns:
     pattern(list): dates with reoccurring changes    
   """
+  for row in df.iterrows():
+    pass
+
+
   pattern = []
 
   return pattern

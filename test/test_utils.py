@@ -1,5 +1,7 @@
 import pandas as pd
 
+import numpy as np
+
 from utils import utils
 
 
@@ -9,6 +11,9 @@ def test_clean_df():
   df = utils.clean_df(df)
 
   assert "percent_chg" in df
+
+  correct_val = (3.000000 - 3.510000) / 3.510000
+  assert np.isclose(df["percent_chg"].iloc[0], correct_val)
 
 
 def test_find_pattern():
