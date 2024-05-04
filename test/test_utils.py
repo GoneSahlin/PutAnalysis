@@ -6,7 +6,7 @@ from utils import utils
 
 
 def load_test_df():
-  df = pd.read_csv("data/NRDY.csv")
+  df = pd.read_csv("test/data/test.csv")
 
   return df
 
@@ -42,6 +42,20 @@ def test_generate_possible_patterns():
   assert len(possible_patterns) == 252
 
 
+def test_evaluate_pattern():
+  # setup
+  df = load_test_df()
+  df = utils.clean_df(df)
+
+  pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
+
+  days_decreased, mean, stdev = utils.evaluate_pattern(pattern, df)
+
+  assert days_decreased == 2
+  assert np.isclose(mean, -0.0365305)
+  assert np.isclose(stdev, 0.06466027494721935)
+
+
 def test_find_pattern():
   # load and clean data
   df = load_test_df()
@@ -53,3 +67,6 @@ def test_find_pattern():
   # test pattern
   correct_pattern = ["2023-05-15", "2023-08-15", "2023-11-15", "2024-02-15"]
   assert pattern == correct_pattern
+
+
+# test_evaluate_pattern()

@@ -19,7 +19,14 @@ def clean_df(df: pd.DataFrame):
 
 
 def generate_possible_patterns(df: pd.DataFrame):
-  """Generates a list of all possible patterns."""
+  """Generates a list of all possible patterns.
+  
+  Parameters:
+    df(DataFrame): stock price data with columns [Date, percent_chg]
+
+  Returns:
+    patterns(list): list of list of dates    
+  """
   possible_patterns = []
 
   max_date = df['Date'].iloc[-1]
@@ -53,6 +60,32 @@ def generate_possible_patterns(df: pd.DataFrame):
   return possible_patterns
 
 
+def evaluate_pattern(pattern: list, df: pd.DataFrame):
+  """Evaluates a pattern, finding the number of days the stock decreased, mean, and standard deviation.
+  
+  Parameters:
+    pattern(list): list of dates
+    df(DataFrame): stock price data with columns [Date, percent_chg]
+
+  Returns:
+    days_decreased(int)
+    mean(float): mean of percent_chg
+    stdev: standard deviation of percent_chg
+  """
+  # get rows in pattern
+  rows = df[df['Date'].isin(pattern)]
+  
+  days_decreased = 0
+  for index, row in rows.iterrows():
+    if row['percent_chg'] <= 0:
+      days_decreased += 1
+
+  mean = rows['percent_chg'].mean()
+  stdev = rows['percent_chg'].std(ddof=0)  # population instead of sample  
+
+  return days_decreased, mean, stdev
+
+
 def find_pattern(df: pd.DataFrame):
   """
   Find patterns in stock prices.
@@ -63,6 +96,7 @@ def find_pattern(df: pd.DataFrame):
   Returns:
     pattern(list): dates with reoccurring changes    
   """
+  possible_patterns = generate_possible_patterns(df)
 
   pattern = []
 
