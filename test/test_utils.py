@@ -71,5 +71,5 @@ def test_find_pattern():
   assert pattern == correct_pattern
 
 
-test_generate_possible_patterns()
+# test_generate_possible_patterns()
 # test_evaluate_pattern()
