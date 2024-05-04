@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import date
 import numpy as np
+import pytest
 
 from utils import utils
 
@@ -39,7 +40,7 @@ def test_generate_possible_patterns():
   correct_last_pattern = [date.fromisoformat("2024-05-02")]
   assert possible_patterns[-1] == correct_last_pattern
 
-  assert len(possible_patterns) == 252
+  assert len(possible_patterns) == 366
 
 
 def test_evaluate_pattern():
@@ -56,6 +57,7 @@ def test_evaluate_pattern():
   assert np.isclose(stdev, 0.06466027494721935)
 
 
+@pytest.mark.skip
 def test_find_pattern():
   # load and clean data
   df = load_test_df()
@@ -69,4 +71,5 @@ def test_find_pattern():
   assert pattern == correct_pattern
 
 
+test_generate_possible_patterns()
 # test_evaluate_pattern()

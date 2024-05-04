@@ -29,18 +29,20 @@ def generate_possible_patterns(df: pd.DataFrame):
   """
   possible_patterns = []
 
+  # range of dates
+  min_date = df['Date'].iloc[0]
   max_date = df['Date'].iloc[-1]
 
   dates_set = set(df['Date'])
 
-  for index, row in df.iterrows():
-    first_date = row['Date']
-
-    i = 0  # first_date should be the first date in the pattern
+  initial_date = min_date
+  # loop for all possible initial dates, initial_date does not necessarily have to be in the dataset
+  while initial_date <= max_date:
+    cur_date = initial_date
     pattern = []
-    cur_date = first_date
+    i = 0
 
-    # loop while cur_date is still within dataset, building a pattern of dates one quarter apart
+    # construct pattern of dates one quarter apart by looping while cur_date is within dataset
     while cur_date <= max_date:
       # find closest date in df
       while cur_date not in dates_set and cur_date <= max_date:
@@ -52,10 +54,13 @@ def generate_possible_patterns(df: pd.DataFrame):
       
       # create new date i quarters from first date, format as datetime.date
       i += 1
-      cur_date = (first_date + pd.DateOffset(months=(3 * i))).date()
+      cur_date = (initial_date + pd.DateOffset(months=(3 * i))).date()
 
     # append created pattern to possible patterns
     possible_patterns.append(pattern)
+    
+    # increment initial_date
+    initial_date = (initial_date + pd.DateOffset(days=1)).date()    
 
   return possible_patterns
 
