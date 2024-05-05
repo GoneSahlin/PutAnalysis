@@ -70,6 +70,20 @@ def test_evaluate_pattern():
   assert np.isclose(stdev, 0.06466027494721935)
 
 
+def test_evaluate_pattern_next_day():
+  # setup
+  df = load_test_df()
+  df = utils.clean_df(df)
+
+  pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
+
+  days_decreased, mean, stdev = utils.evaluate_pattern_next_day(pattern, df)
+
+  assert days_decreased == 2
+  assert np.isclose(mean, 0.00632875275090846)
+  assert np.isclose(stdev, 0.03385370464431046)
+
+
 @pytest.mark.skip
 def test_find_pattern():
   # load and clean data

@@ -107,6 +107,34 @@ def evaluate_pattern(pattern: list, df: pd.DataFrame):
   return days_decreased, mean, stdev
 
 
+def evaluate_pattern_next_day(pattern: list, df: pd.DataFrame):
+  """Evaluates the following days of a pattern, finding the number of days the stock decreased, 
+  mean, and standard deviation.
+  
+  Parameters:
+    pattern(list): list of dates
+    df(DataFrame): stock price data with columns [Date, percent_chg]
+
+  Returns:
+    days_decreased(int)
+    mean(float): mean of percent_chg
+    stdev: standard deviation of percent_chg
+  """
+  # get rows in pattern
+  shifted_df = df.shift(-1)
+  rows = shifted_df[df['Date'].isin(pattern)]
+  
+  days_decreased = 0
+  for index, row in rows.iterrows():
+    if row['percent_chg'] <= 0:
+      days_decreased += 1
+
+  mean = rows['percent_chg'].mean()
+  stdev = rows['percent_chg'].std(ddof=0)  # population instead of sample  
+
+  return days_decreased, mean, stdev
+
+
 def find_pattern(df: pd.DataFrame):
   """
   Find patterns in stock prices.
@@ -118,6 +146,9 @@ def find_pattern(df: pd.DataFrame):
     pattern(list): dates with reoccurring changes    
   """
   possible_patterns = generate_possible_patterns(df)
+
+  # basic algorithm looking for patterns with low mean, low stdev, and low mean for next day
+
 
   pattern = []
 
