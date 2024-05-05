@@ -24,6 +24,19 @@ def test_clean_df():
 
   # test date
   assert type(df["Date"].iloc[0]) == date
+
+
+def test_generate_pattern_from_date():
+  # load and clean data
+  df = load_test_df()
+  df = utils.clean_df(df)
+
+  initial_date = date.fromisoformat("2023-05-03")
+  pattern = utils.generate_pattern_from_date(initial_date, df)
+
+  # test output
+  correct_pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
+  assert pattern == correct_pattern
   
 
 def test_generate_possible_patterns():

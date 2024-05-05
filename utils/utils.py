@@ -18,6 +18,40 @@ def clean_df(df: pd.DataFrame):
   return df
 
 
+def generate_pattern_from_date(initial_date: date, df: pd.DataFrame):
+  """Generates a pattern of dates, starting from the initial_date
+  Parameters:
+    initial_date(datetime.date): starting date
+    df(DataFrame): stock price data with columns [Date, percent_chg]
+
+  Returns:
+    pattern(list): list of dates
+  """
+  max_date = df['Date'].iloc[-1]
+
+  cur_date = initial_date
+  pattern = []
+  i = 0
+
+  dates_set = set(df['Date'])
+
+  # construct pattern of dates one quarter apart by looping while cur_date is within dataset
+  while cur_date <= max_date:
+    # find closest date in df
+    while cur_date not in dates_set and cur_date <= max_date:
+      cur_date = (cur_date + pd.DateOffset(days=1)).date()
+
+    # check cur_date has not left range
+    if cur_date <= max_date:
+      pattern.append(cur_date)
+    
+    # create new date i quarters from first date, format as datetime.date
+    i += 1
+    cur_date = (initial_date + pd.DateOffset(months=(3 * i))).date()
+
+  return pattern  
+
+
 def generate_possible_patterns(df: pd.DataFrame):
   """Generates a list of all possible patterns.
   
@@ -33,28 +67,10 @@ def generate_possible_patterns(df: pd.DataFrame):
   min_date = df['Date'].iloc[0]
   max_date = df['Date'].iloc[-1]
 
-  dates_set = set(df['Date'])
-
   initial_date = min_date
   # loop for all possible initial dates, initial_date does not necessarily have to be in the dataset
   while initial_date <= max_date:
-    cur_date = initial_date
-    pattern = []
-    i = 0
-
-    # construct pattern of dates one quarter apart by looping while cur_date is within dataset
-    while cur_date <= max_date:
-      # find closest date in df
-      while cur_date not in dates_set and cur_date <= max_date:
-        cur_date = (cur_date + pd.DateOffset(days=1)).date()
-
-      # check cur_date has not left range
-      if cur_date <= max_date:
-        pattern.append(cur_date)
-      
-      # create new date i quarters from first date, format as datetime.date
-      i += 1
-      cur_date = (initial_date + pd.DateOffset(months=(3 * i))).date()
+    pattern = generate_pattern_from_date(initial_date, df)
 
     # append created pattern to possible patterns
     possible_patterns.append(pattern)
