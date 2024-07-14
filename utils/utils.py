@@ -81,8 +81,8 @@ def generate_possible_patterns(df: pd.DataFrame):
   return possible_patterns
 
 
-def evaluate_pattern(pattern: list, df: pd.DataFrame):
-  """Evaluates a pattern, finding the number of days the stock decreased, mean, and standard deviation.
+def summarize_pattern(pattern: list, df: pd.DataFrame):
+  """summarizes a pattern, finding the number of days the stock decreased, mean, and standard deviation.
   
   Parameters:
     pattern(list): list of dates
@@ -107,8 +107,8 @@ def evaluate_pattern(pattern: list, df: pd.DataFrame):
   return days_decreased, mean, stdev
 
 
-def evaluate_pattern_next_day(pattern: list, df: pd.DataFrame):
-  """Evaluates the following days of a pattern, finding the number of days the stock decreased, 
+def summarize_pattern_next_day(pattern: list, df: pd.DataFrame):
+  """summarizes the following days of a pattern, finding the number of days the stock decreased, 
   mean, and standard deviation.
   
   Parameters:
@@ -135,21 +135,79 @@ def evaluate_pattern_next_day(pattern: list, df: pd.DataFrame):
   return days_decreased, mean, stdev
 
 
-def find_pattern(df: pd.DataFrame):
+def evaluate_pattern(pattern: list, df: pd.DataFrame):
+  """Evaluated whether a pattern is 'good' or 'bad'
+  
+  Parameters:
+    pattern(list): list of dates
+    df(DataFrame): stock price data with columns[Date, percent_chg]
+    
+  Returns:
+    evaluation(boolean): if the pattern is 'good'
   """
-  Find patterns in stock prices.
+  days_decreased, mean, stdev = summarize_pattern(pattern, df)
+  next_days_decreased, next_mean, next_stdev = summarize_pattern_next_day(pattern, df)
+
+  # must be longer than two years
+  if len(pattern) < 8:
+    return False
+
+  # mean must be < 0
+  if mean >= 0:
+    return False
+  
+  # percentage of days decreased must be >= .9
+  if days_decreased / len(pattern) <= .75:
+    return False
+  
+  # next days mean must also be < 0
+  if next_mean >= 0:
+    return False
+  
+  # next days percentage of days decreased must be >= .75
+  if next_days_decreased / len(pattern) <= .75:
+    return False
+  
+  return True
+
+
+def find_good_patterns(df: pd.DataFrame):
+  """Find patterns in stock prices.
 
   Parameters:
     df(DataFrame): stock price data with columns [Date, percent_chg]
 
   Returns:
-    pattern(list): dates with reoccurring changes    
+    good_patterns(list): patterns that have been evaluated as 'good'    
   """
   possible_patterns = generate_possible_patterns(df)
 
-  # basic algorithm looking for patterns with low mean, low stdev, and low mean for next day
+  good_patterns = []
+  for pattern in possible_patterns:
+    evaluation = evaluate_pattern(pattern, df)
+
+    if evaluation:
+      good_patterns.append(pattern)
 
 
-  pattern = []
+  return good_patterns
 
-  return pattern
+
+def prune_patterns(patterns: list):
+  """Prunes away patterns that are a subset of other longer patterns or are the
+  following days of other patterns.
+
+  Parameters:
+    patterns(list): list of list of dates
+
+  Returns:
+    pruned_patterns(list): list of list of dates
+  """
+  patterns.sort(key=lambda x: len(x), reverse=True)
+  pruned_patterns = []
+  for pattern in patterns:
+    for date in pattern:
+      if not any(date in pruned_pattern for pruned_pattern in pruned_patterns):
+        pruned_patterns.append(pattern)
+
+  return pruned_patterns
