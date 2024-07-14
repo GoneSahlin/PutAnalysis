@@ -153,7 +153,7 @@ def evaluate_pattern(pattern: list, df: pd.DataFrame):
     return False
 
   # mean must be < 0
-  if mean >= 0:
+  if mean >= 0.01:
     return False
   
   # percentage of days decreased must be >= .9
@@ -161,7 +161,7 @@ def evaluate_pattern(pattern: list, df: pd.DataFrame):
     return False
   
   # next days mean must also be < 0
-  if next_mean >= 0:
+  if next_mean >= 0.01:
     return False
   
   # next days percentage of days decreased must be >= .75
@@ -210,12 +210,10 @@ def prune_patterns(patterns: list):
     for date in pattern:
       for pruned_pattern in pruned_patterns:
         for pruned_date in pruned_pattern:
-          if date == pruned_date:
-            new_pattern = False
-          if date - timedelta(days=5) < pruned_date and date > pruned_date:
+          # remove if date is either same as pruned_date or within 5 days after pruned_date 
+          if date - timedelta(days=5) < pruned_date and date >= pruned_date:
             new_pattern = False
     if new_pattern:
       pruned_patterns.append(pattern)
-
 
   return pruned_patterns
