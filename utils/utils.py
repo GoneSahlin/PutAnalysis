@@ -206,8 +206,16 @@ def prune_patterns(patterns: list):
   patterns.sort(key=lambda x: len(x), reverse=True)
   pruned_patterns = []
   for pattern in patterns:
+    new_pattern = True
     for date in pattern:
-      if not any(date in pruned_pattern for pruned_pattern in pruned_patterns):
-        pruned_patterns.append(pattern)
+      for pruned_pattern in pruned_patterns:
+        for pruned_date in pruned_pattern:
+          if date == pruned_date:
+            new_pattern = False
+          if date - timedelta(days=5) < pruned_date and date > pruned_date:
+            new_pattern = False
+    if new_pattern:
+      pruned_patterns.append(pattern)
+
 
   return pruned_patterns
