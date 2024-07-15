@@ -189,7 +189,6 @@ def find_good_patterns(df: pd.DataFrame):
     if evaluation:
       good_patterns.append(pattern)
 
-
   return good_patterns
 
 

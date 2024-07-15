@@ -14,6 +14,10 @@ lint: $(VENV)
 test: $(VENV)
 	-$(VENV)/bin/pytest
 
+.PHONY: test-s
+test-s: $(VENV)
+	-$(VENV)/bin/pytest -s
+
 .PHONY: clean
 clean:
 	rm -rf $(VENV)

@@ -6,8 +6,11 @@ import pytest
 from utils import utils
 
 
-def load_test_df():
-  df = pd.read_csv("test/data/test.csv")
+def load_test_df(full=False):
+  if full:
+    df = pd.read_csv("test/data/full_test.csv")
+  else:
+    df = pd.read_csv("test/data/test.csv")
 
   return df
 
@@ -35,7 +38,8 @@ def test_generate_pattern_from_date():
   pattern = utils.generate_pattern_from_date(initial_date, df)
 
   # test output
-  correct_pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
+  correct_pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", 
+                                                     "2023-11-03", "2024-02-05"]]
   assert pattern == correct_pattern
   
 
@@ -47,7 +51,8 @@ def test_generate_possible_patterns():
   possible_patterns = utils.generate_possible_patterns(df)
 
   # test output
-  correct_first_pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
+  correct_first_pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", 
+                                                           "2023-11-03", "2024-02-05"]]
   assert possible_patterns[0] == correct_first_pattern
 
   correct_last_pattern = [date.fromisoformat("2024-05-02")]
@@ -56,47 +61,60 @@ def test_generate_possible_patterns():
   assert len(possible_patterns) == 366
 
 
-def test_evaluate_pattern():
+def test_summarize_pattern():
   # setup
   df = load_test_df()
   df = utils.clean_df(df)
 
   pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
 
-  days_decreased, mean, stdev = utils.evaluate_pattern(pattern, df)
+  days_decreased, mean, stdev = utils.summarize_pattern(pattern, df)
 
   assert days_decreased == 2
   assert np.isclose(mean, -0.0365305)
   assert np.isclose(stdev, 0.06466027494721935)
 
 
-def test_evaluate_pattern_next_day():
+def test_summarize_pattern_next_day():
   # setup
   df = load_test_df()
   df = utils.clean_df(df)
 
   pattern = [date.fromisoformat(x) for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]]
 
-  days_decreased, mean, stdev = utils.evaluate_pattern_next_day(pattern, df)
+  days_decreased, mean, stdev = utils.summarize_pattern_next_day(pattern, df)
 
   assert days_decreased == 2
   assert np.isclose(mean, 0.00632875275090846)
   assert np.isclose(stdev, 0.03385370464431046)
 
 
-@pytest.mark.skip
-def test_find_pattern():
+def test_find_good_patterns():
   # load and clean data
-  df = load_test_df()
+  df = load_test_df(full=True)
   df = utils.clean_df(df)
 
-  # find pattern
-  pattern = utils.find_pattern(df)
+  # find patterns
+  patterns = utils.find_good_patterns(df)
 
-  # test pattern
-  correct_pattern = ["2023-05-15", "2023-08-15", "2023-11-15", "2024-02-15"]
-  assert pattern == correct_pattern
+  # test to ensure that the pattern starting on 2-16-2021 is found
+  assert any([pattern[0] == date(2021, 2, 16) for pattern in patterns])
 
 
-# test_generate_possible_patterns()
-# test_evaluate_pattern()
+def test_prune_patterns():
+  # load and clean data, and find patterns
+  df = load_test_df(full=True)
+  df = utils.clean_df(df)
+  patterns = utils.find_good_patterns(df)
+
+  # prune patterns
+  pruned_patterns = utils.prune_patterns(patterns)
+
+  # test to ensure that the pattern starting on 2-16-2021 is found
+  assert any([pattern[0] == date(2021, 2, 16) for pattern in patterns])
+
+  # test to ensure no dates are repeated in patterns
+  all_dates = []
+  for pattern in pruned_patterns:
+    all_dates.extend(pattern)
+  assert len(set(all_dates)) == len(all_dates)
