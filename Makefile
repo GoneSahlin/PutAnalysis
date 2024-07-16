@@ -8,7 +8,11 @@ $(VENV): setup.cfg
 
 .PHONY: lint
 lint: $(VENV)
-	-$(VENV)/bin/flake8 --exclude $(VENV)
+	-$(VENV)/bin/flake8 --exclude $(VENV) --max-line-length=88
+
+.PHONY: format
+format: $(VENV)
+	-$(VENV)/bin/black --exclude $(VENV) .
 
 .PHONY: test
 test: $(VENV)
