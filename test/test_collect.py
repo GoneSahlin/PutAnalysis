@@ -1,4 +1,4 @@
-from utils import collect
+from pattern_detector import collect
 
 
 def test_get_download_link():

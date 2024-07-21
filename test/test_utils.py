@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import date
 import numpy as np
 
-from utils import utils
+from pattern_detector import utils
 
 
 def load_test_df(full=False):
