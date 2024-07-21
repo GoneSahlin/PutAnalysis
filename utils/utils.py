@@ -21,11 +21,11 @@ def clean_df(df: pd.DataFrame):
 def generate_pattern_from_date(initial_date: date, df: pd.DataFrame):
     """Generates a pattern of dates, starting from the initial_date
     Parameters:
-      initial_date(datetime.date): starting date
-      df(DataFrame): stock price data with columns [Date, percent_chg]
+        initial_date(datetime.date): starting date
+        df(DataFrame): stock price data with columns [Date, percent_chg]
 
     Returns:
-      pattern(list): list of dates
+        pattern(list): list of dates
     """
     max_date = df["Date"].iloc[-1]
 
@@ -57,10 +57,10 @@ def generate_possible_patterns(df: pd.DataFrame):
     """Generates a list of all possible patterns.
 
     Parameters:
-      df(DataFrame): stock price data with columns [Date, percent_chg]
+        df(DataFrame): stock price data with columns [Date, percent_chg]
 
     Returns:
-      patterns(list): list of list of dates
+        patterns(list): list of list of dates
     """
     possible_patterns = []
 
@@ -88,13 +88,13 @@ def summarize_pattern(pattern: list, df: pd.DataFrame):
     standard deviation.
 
     Parameters:
-      pattern(list): list of dates
-      df(DataFrame): stock price data with columns [Date, percent_chg]
+        pattern(list): list of dates
+        df(DataFrame): stock price data with columns [Date, percent_chg]
 
     Returns:
-      days_decreased(int)
-      mean(float): mean of percent_chg
-      stdev: standard deviation of percent_chg
+        days_decreased(int)
+        mean(float): mean of percent_chg
+        stdev: standard deviation of percent_chg
     """
     # get rows in pattern
     rows = df[df["Date"].isin(pattern)]
@@ -115,13 +115,13 @@ def summarize_pattern_next_day(pattern: list, df: pd.DataFrame):
     decreased, mean, and standard deviation.
 
     Parameters:
-      pattern(list): list of dates
-      df(DataFrame): stock price data with columns [Date, percent_chg]
+        pattern(list): list of dates
+        df(DataFrame): stock price data with columns [Date, percent_chg]
 
     Returns:
-      days_decreased(int)
-      mean(float): mean of percent_chg
-      stdev: standard deviation of percent_chg
+        days_decreased(int)
+        mean(float): mean of percent_chg
+        stdev: standard deviation of percent_chg
     """
     # get rows in pattern
     shifted_df = df.shift(-1)
@@ -142,11 +142,11 @@ def evaluate_pattern(pattern: list, df: pd.DataFrame):
     """Evaluated whether a pattern is 'good' or 'bad'
 
     Parameters:
-      pattern(list): list of dates
-      df(DataFrame): stock price data with columns[Date, percent_chg]
+        pattern(list): list of dates
+        df(DataFrame): stock price data with columns[Date, percent_chg]
 
     Returns:
-      evaluation(boolean): if the pattern is 'good'
+        evaluation(boolean): if the pattern is 'good'
     """
     days_decreased, mean, stdev = summarize_pattern(pattern, df)
     next_days_decreased, next_mean, next_stdev = summarize_pattern_next_day(pattern, df)
@@ -178,10 +178,10 @@ def find_good_patterns(df: pd.DataFrame):
     """Find patterns in stock prices.
 
     Parameters:
-      df(DataFrame): stock price data with columns [Date, percent_chg]
+        df(DataFrame): stock price data with columns [Date, percent_chg]
 
     Returns:
-      good_patterns(list): patterns that have been evaluated as 'good'
+        good_patterns(list): patterns that have been evaluated as 'good'
     """
     possible_patterns = generate_possible_patterns(df)
 
@@ -200,10 +200,10 @@ def prune_patterns(patterns: list):
     following days of other patterns.
 
     Parameters:
-      patterns(list): list of list of dates
+        patterns(list): list of list of dates
 
     Returns:
-      pruned_patterns(list): list of list of dates
+        pruned_patterns(list): list of list of dates
     """
     patterns.sort(key=lambda x: len(x), reverse=True)
     pruned_patterns = []
