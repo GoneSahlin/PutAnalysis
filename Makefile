@@ -6,6 +6,10 @@ $(VENV): setup.cfg
 	$(VENV)/bin/pip install -e .[dev]
 	touch $(VENV)
 
+.PHONY: run
+run: $(VENV)
+	-$(VENV)/bin/python3 pattern_detector/main.py
+
 .PHONY: lint
 lint: $(VENV)
 	-$(VENV)/bin/flake8 --exclude $(VENV) --max-line-length=88
