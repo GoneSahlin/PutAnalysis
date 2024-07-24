@@ -17,7 +17,7 @@ def clean_df(df: pd.DataFrame):
 
     # shorten to include only 10 years
     max_date = df["Date"].iloc[-1]
-    min_date = max_date.replace(year=max_date.year-10)
+    min_date = max_date.replace(year=max_date.year - 10)
     df = df.loc[df["Date"] > min_date]
 
     return df

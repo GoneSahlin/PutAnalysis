@@ -6,6 +6,10 @@ from pattern_detector import utils
 
 
 def get_wilshire_tickers():
+    """Gets the tickers for the companies in the wilshire 5000 as listed in
+    data/Wilshire-5000-Stocks.csv from
+    https://github.com/derekbanas/Python4Finance/blob/main/Wilshire-5000-Stocks.csv
+    """
     wilshire_df = pd.read_csv("data/Wilshire-5000-Stocks.csv")
 
     tickers = wilshire_df["Ticker"].to_list()
@@ -14,6 +18,13 @@ def get_wilshire_tickers():
 
 
 def log_pattern(ticker, pattern, df, filepath=None):
+    """Logs the pattern and its summarizations
+    Parameters:
+        ticker(str): the stock ticker
+        pattern(list): list of dates
+        df(DataFrame): stock price data
+        filepath(os.path): path to output log
+    """
     if filepath is None:
         filepath = "data/good_patterns.csv"
 
@@ -27,7 +38,7 @@ def log_pattern(ticker, pattern, df, filepath=None):
         # format row as strings
         row = [str(x) for x in row]
 
-        outfile.write(';'.join(row) + "\n")
+        outfile.write(";".join(row) + "\n")
 
 
 def main():

@@ -10,6 +10,9 @@ $(VENV): setup.cfg
 run: $(VENV)
 	-$(VENV)/bin/python3 pattern_detector/main.py
 
+.PHONY: check
+check: lint format test
+
 .PHONY: lint
 lint: $(VENV)
 	-$(VENV)/bin/flake8 --exclude $(VENV) --max-line-length=88
