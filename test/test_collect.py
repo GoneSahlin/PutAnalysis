@@ -26,6 +26,4 @@ def test_get_data():
     with open("test/data/test_get_data.csv", "r") as infile:
         correct_data = infile.read()
 
-        print(data, correct_data)
-
         assert data == correct_data

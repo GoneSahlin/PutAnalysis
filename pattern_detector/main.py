@@ -1,29 +1,56 @@
 import pandas as pd
 from io import StringIO
 
-import collect
-import utils
+from pattern_detector import collect
+from pattern_detector import utils
+
+
+def get_wilshire_tickers():
+    wilshire_df = pd.read_csv("data/Wilshire-5000-Stocks.csv")
+
+    tickers = wilshire_df["Ticker"].to_list()
+
+    return tickers
+
+
+def log_pattern(ticker, pattern, df, filepath=None):
+    if filepath is None:
+        filepath = "data/good_patterns.csv"
+
+    with open(filepath, "a") as outfile:
+        row = []
+        row.append(ticker)
+        row.append(pattern)
+        row.extend(utils.summarize_pattern(pattern, df))
+        row.extend(utils.summarize_pattern_next_day(pattern, df))
+
+        # format row as strings
+        row = [str(x) for x in row]
+
+        outfile.write(';'.join(row) + "\n")
 
 
 def main():
-    # collect data
-    link = collect.get_download_link("NVDA")
-    data_str = collect.get_data(link)
+    tickers = get_wilshire_tickers()
 
-    # format as df
-    string_io = StringIO(data_str)
-    df = pd.read_csv(string_io)
+    for ticker in tickers:
+        # collect data
+        link = collect.get_download_link(ticker)
+        data_str = collect.get_data(link)
 
-    # clean df
-    df = utils.clean_df(df)
+        # format as df
+        string_io = StringIO(data_str)
+        df = pd.read_csv(string_io)
 
-    # find good patterns
-    patterns = utils.find_good_patterns(df)
+        # clean df
+        df = utils.clean_df(df)
 
-    print(patterns)
+        # find good patterns
+        patterns = utils.find_good_patterns(df)
 
-    print(utils.summarize_pattern(patterns[0], df))
-    print(utils.summarize_pattern_next_day(patterns[0], df))
+        # log patterns
+        for pattern in patterns:
+            log_pattern(ticker, pattern, df)
 
 
 if __name__ == "__main__":
