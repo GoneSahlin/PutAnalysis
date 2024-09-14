@@ -129,6 +129,7 @@ def test_prune_patterns():
         all_dates.extend(pattern)
     assert len(set(all_dates)) == len(all_dates)
 
+
 def test_get_wilshire_tickers():
     tickers = utils.get_wilshire_tickers()
 

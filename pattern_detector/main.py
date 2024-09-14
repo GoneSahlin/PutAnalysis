@@ -5,7 +5,6 @@ from pattern_detector import collect
 from pattern_detector import utils
 
 
-
 def log_pattern(ticker, pattern, df, filepath=None):
     """Logs the pattern and its summarizations
     Parameters:
@@ -56,7 +55,7 @@ def main():
             # log patterns
             for pattern in patterns:
                 log_pattern(ticker, pattern, df)
-        except Exception as e:
+        except Exception:
             pass
 
 
