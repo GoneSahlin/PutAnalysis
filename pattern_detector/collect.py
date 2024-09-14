@@ -5,7 +5,9 @@ import json
 
 
 def get_download_link(ticker: str) -> str:
-    """Gets the yahoo link to download the data for all time
+    """
+    *Deprecated*
+    Gets the yahoo link to download the data for all time
 
     Parameters:
         ticker(str): ticker to download data for
