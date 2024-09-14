@@ -83,7 +83,7 @@ def get_data(ticker: str) -> pd.DataFrame:
         response.raise_for_status()
 
     except requests.exceptions.RequestException as e:
-        print(e.response.text)
+        print("- " + ticker + ":", e.response.text)
 
     json_obj = json.loads(response.text)
 
