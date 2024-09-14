@@ -5,17 +5,6 @@ from pattern_detector import collect
 from pattern_detector import utils
 
 
-def get_wilshire_tickers():
-    """Gets the tickers for the companies in the wilshire 5000 as listed in
-    data/Wilshire-5000-Stocks.csv from
-    https://github.com/derekbanas/Python4Finance/blob/main/Wilshire-5000-Stocks.csv
-    """
-    wilshire_df = pd.read_csv("data/Wilshire-5000-Stocks.csv")
-
-    tickers = wilshire_df["Ticker"].to_list()
-
-    return tickers
-
 
 def log_pattern(ticker, pattern, df, filepath=None):
     """Logs the pattern and its summarizations
@@ -42,26 +31,33 @@ def log_pattern(ticker, pattern, df, filepath=None):
 
 
 def main():
-    tickers = get_wilshire_tickers()
+    tickers = utils.get_wilshire_tickers()
 
     for ticker in tickers:
-        # collect data
-        link = collect.get_download_link(ticker)
-        data_str = collect.get_data(link)
+        try:
+            # collect data
+            link = collect.get_download_link(ticker)
+            data_str = collect.get_data(link)
 
-        # format as df
-        string_io = StringIO(data_str)
-        df = pd.read_csv(string_io)
+            # check that data is found, else skip ticker
+            if not data_str:
+                break
 
-        # clean df
-        df = utils.clean_df(df)
+            # format as df
+            string_io = StringIO(data_str)
+            df = pd.read_csv(string_io)
 
-        # find good patterns
-        patterns = utils.find_good_patterns(df)
+            # clean df
+            df = utils.clean_df(df)
 
-        # log patterns
-        for pattern in patterns:
-            log_pattern(ticker, pattern, df)
+            # find good patterns
+            patterns = utils.find_good_patterns(df)
+
+            # log patterns
+            for pattern in patterns:
+                log_pattern(ticker, pattern, df)
+        except Exception as e:
+            pass
 
 
 if __name__ == "__main__":

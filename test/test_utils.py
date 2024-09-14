@@ -128,3 +128,11 @@ def test_prune_patterns():
     for pattern in pruned_patterns:
         all_dates.extend(pattern)
     assert len(set(all_dates)) == len(all_dates)
+
+def test_get_wilshire_tickers():
+    tickers = utils.get_wilshire_tickers()
+
+    assert type(tickers) is list
+    assert len(tickers) == 3481
+    assert tickers[0] == "A"
+    assert tickers[-1] == "ZNGA"

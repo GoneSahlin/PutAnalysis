@@ -225,3 +225,15 @@ def prune_patterns(patterns: list):
             pruned_patterns.append(pattern)
 
     return pruned_patterns
+
+
+def get_wilshire_tickers():
+    """Gets the tickers for the companies in the wilshire 5000 as listed in
+    data/Wilshire-5000-Stocks.csv from
+    https://github.com/derekbanas/Python4Finance/blob/main/Wilshire-5000-Stocks.csv
+    """
+    wilshire_df = pd.read_csv("data/Wilshire-5000-Stocks.csv")
+
+    tickers = wilshire_df["Ticker"].to_list()
+
+    return tickers

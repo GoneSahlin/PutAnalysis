@@ -5,15 +5,6 @@ from pattern_detector import main, utils
 from test_utils import load_test_df
 
 
-def test_get_wilshire_tickers():
-    tickers = main.get_wilshire_tickers()
-
-    assert type(tickers) is list
-    assert len(tickers) == 3481
-    assert tickers[0] == "A"
-    assert tickers[-1] == "ZNGA"
-
-
 # contents of test_image.py
 def test_log_pattern():
     # create temporary filepath for testing
