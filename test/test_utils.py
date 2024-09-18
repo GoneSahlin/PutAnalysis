@@ -1,19 +1,29 @@
 import pandas as pd
 from datetime import date
 import numpy as np
+import polars as pl
+import pytest
 
 from pattern_detector import utils
 
 
-def load_test_df(full=False):
+def load_test_df(full=False, clean=True):
     if full:
-        df = pd.read_csv("test/data/full_test.csv")
+        df = pl.read_csv("test/data/full_test.csv")
     else:
-        df = pd.read_csv("test/data/test.csv")
+        df = pl.read_csv("test/data/test.csv")
+
+    df = df.select(
+        pl.col("Date").cast(date).alias("date"), pl.col("Adj Close").alias("NVDA")
+    )
+
+    if clean:
+        df = utils.convert_to_percentage(df)
 
     return df
 
 
+@pytest.mark.skip
 def test_clean_df():
     # load and clean data
     df = load_test_df()
@@ -29,13 +39,28 @@ def test_clean_df():
     assert type(df["Date"].iloc[0]) is date
 
 
+def test_convert_to_percentage():
+    df = load_test_df(clean=False)
+
+    percent_df = utils.convert_to_percentage(df)
+
+    assert type(percent_df) == pl.DataFrame
+
+    assert percent_df.null_count().sum_horizontal()[0] == 0
+
+    assert percent_df.columns == ["date", "NVDA"]
+
+    assert np.isclose(percent_df["NVDA"][0], -0.14529914529914525)
+
+
+
 def test_generate_pattern_from_date():
     # load and clean data
     df = load_test_df()
-    df = utils.clean_df(df)
 
     initial_date = date.fromisoformat("2023-05-03")
-    pattern = utils.generate_pattern_from_date(initial_date, df)
+    dates = df["date"]
+    pattern = utils.generate_pattern_from_date(initial_date, dates)
 
     # test output
     correct_pattern = [
@@ -48,11 +73,13 @@ def test_generate_pattern_from_date():
 def test_generate_possible_patterns():
     # load and clean data
     df = load_test_df()
-    df = utils.clean_df(df)
+    dates = df["date"]
 
-    possible_patterns = utils.generate_possible_patterns(df)
+    possible_patterns = utils.generate_possible_patterns(dates)
 
     # test output
+    assert type(possible_patterns) == list
+
     correct_first_pattern = [
         date.fromisoformat(x)
         for x in ["2023-05-03", "2023-08-03", "2023-11-03", "2024-02-05"]
@@ -68,7 +95,7 @@ def test_generate_possible_patterns():
 def test_summarize_pattern():
     # setup
     df = load_test_df()
-    df = utils.clean_df(df)
+    df = df.select("date", pl.col("NVDA").alias("value"))
 
     pattern = [
         date.fromisoformat(x)
@@ -85,7 +112,7 @@ def test_summarize_pattern():
 def test_summarize_pattern_next_day():
     # setup
     df = load_test_df()
-    df = utils.clean_df(df)
+    df = df.select("date", pl.col("NVDA").alias("value"))
 
     pattern = [
         date.fromisoformat(x)
@@ -99,10 +126,22 @@ def test_summarize_pattern_next_day():
     assert np.isclose(stdev, 0.03385370464431046)
 
 
+def test_evaluate_pattern():
+    # setup
+    df = load_test_df(full=True)
+    df = df.select("date", pl.col("NVDA").alias("value"))
+    pattern = [date(2021, 2, 16), date(2021, 5, 17), date(2021, 8, 16), date(2021, 11, 16), date(2022, 2, 16), date(2022, 5, 16), date(2022, 8, 16), date(2022, 11, 16), date(2023, 2, 16), date(2023, 5, 16), date(2023, 8, 16), date(2023, 11, 16), date(2024, 2, 16)]
+
+    result = utils.evaluate_pattern(pattern, df)
+
+    assert type(result) == bool
+    assert result
+
+
 def test_find_good_patterns():
     # load and clean data
     df = load_test_df(full=True)
-    df = utils.clean_df(df)
+    df = df.select("date", pl.col("NVDA").alias("value"))
 
     # find patterns
     patterns = utils.find_good_patterns(df)

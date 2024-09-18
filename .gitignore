@@ -1,5 +1,9 @@
+# Project specific
 data/bronze/*
 data/silver/*
+
+# VS Code
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

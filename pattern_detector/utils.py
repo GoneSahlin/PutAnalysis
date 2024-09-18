@@ -1,10 +1,11 @@
 import pandas as pd
 from datetime import date
 from datetime import timedelta
+import polars as pl
 
 
 def clean_df(df: pd.DataFrame):
-    """Cleans DataFrame."""
+    """*Deprecated* Cleans DataFrame."""
     # calculate percent change
     prev_close = df["Close"].shift(1)
     df["percent_chg"] = (df["Close"] - prev_close) / prev_close
@@ -23,7 +24,27 @@ def clean_df(df: pd.DataFrame):
     return df
 
 
-def generate_pattern_from_date(initial_date: date, df: pd.DataFrame):
+def convert_to_percentage(df: pl.DataFrame):
+    """Converts the df to percentage change for all but date column
+    
+    Parameters:
+        df(pl.DataFrame): has column date
+
+    Returns:
+        percent_df(pl.DataFrame): same columns as df
+    """
+    percent_df = df.select(
+        pl.col("date"),
+        pl.all().exclude("date").pct_change()
+    )
+
+    # drop first row
+    percent_df = percent_df[1:]
+
+    return percent_df
+
+
+def generate_pattern_from_date(initial_date: date, dates: pl.Series):
     """Generates a pattern of dates, starting from the initial_date
     Parameters:
         initial_date(datetime.date): starting date
@@ -32,13 +53,13 @@ def generate_pattern_from_date(initial_date: date, df: pd.DataFrame):
     Returns:
         pattern(list): list of dates
     """
-    max_date = df["Date"].iloc[-1]
+    max_date = dates[-1]
 
     cur_date = initial_date
     pattern = []
     i = 0
 
-    dates_set = set(df["Date"])
+    dates_set = set(dates)
 
     # construct pattern of dates one quarter apart by looping while cur_date is within
     # dataset
@@ -58,11 +79,11 @@ def generate_pattern_from_date(initial_date: date, df: pd.DataFrame):
     return pattern
 
 
-def generate_possible_patterns(df: pd.DataFrame):
+def generate_possible_patterns(dates: pl.Series):
     """Generates a list of all possible patterns.
 
     Parameters:
-        df(DataFrame): stock price data with columns [Date, percent_chg]
+        dates(pl.Series): all dates as type datetime.date
 
     Returns:
         patterns(list): list of list of dates
@@ -70,14 +91,14 @@ def generate_possible_patterns(df: pd.DataFrame):
     possible_patterns = []
 
     # range of dates
-    min_date = df["Date"].iloc[0]
-    max_date = df["Date"].iloc[-1]
+    min_date = dates[0]
+    max_date = dates[-1]
 
     initial_date = min_date
     # loop for all possible initial dates, initial_date does not necessarily have to be
     # in the dataset
     while initial_date <= max_date:
-        pattern = generate_pattern_from_date(initial_date, df)
+        pattern = generate_pattern_from_date(initial_date, dates)
 
         # append created pattern to possible patterns
         possible_patterns.append(pattern)
@@ -88,13 +109,13 @@ def generate_possible_patterns(df: pd.DataFrame):
     return possible_patterns
 
 
-def summarize_pattern(pattern: list, df: pd.DataFrame):
+def summarize_pattern(pattern: list, df: pl.DataFrame):
     """summarizes a pattern, finding the number of days the stock decreased, mean, and
     standard deviation.
 
     Parameters:
         pattern(list): list of dates
-        df(DataFrame): stock price data with columns [Date, percent_chg]
+        df(DataFrame): stock price data with columns [date, value]
 
     Returns:
         days_decreased(int)
@@ -102,53 +123,45 @@ def summarize_pattern(pattern: list, df: pd.DataFrame):
         stdev: standard deviation of percent_chg
     """
     # get rows in pattern
-    rows = df[df["Date"].isin(pattern)]
+    rows = df.filter(pl.col("date").is_in(pattern))
 
-    days_decreased = 0
-    for index, row in rows.iterrows():
-        if row["percent_chg"] <= 0:
-            days_decreased += 1
+    days_decreased = rows.filter(pl.col("value") < 0).height
 
-    mean = rows["percent_chg"].mean()
-    stdev = rows["percent_chg"].std(ddof=0)  # population instead of sample
+    mean = rows["value"].mean()
+    stdev = rows["value"].std(ddof=0)
 
     return days_decreased, mean, stdev
 
 
-def summarize_pattern_next_day(pattern: list, df: pd.DataFrame):
+def summarize_pattern_next_day(pattern: list, df: pl.DataFrame):
     """summarizes the following days of a pattern, finding the number of days the stock
     decreased, mean, and standard deviation.
 
     Parameters:
         pattern(list): list of dates
-        df(DataFrame): stock price data with columns [Date, percent_chg]
+        df(DataFrame): stock price data with columns [date, value]
 
     Returns:
         days_decreased(int)
         mean(float): mean of percent_chg
         stdev: standard deviation of percent_chg
     """
-    # get rows in pattern
-    shifted_df = df.shift(-1)
-    rows = shifted_df[df["Date"].isin(pattern)]
-
-    days_decreased = 0
-    for index, row in rows.iterrows():
-        if row["percent_chg"] <= 0:
-            days_decreased += 1
-
-    mean = rows["percent_chg"].mean()
-    stdev = rows["percent_chg"].std(ddof=0)  # population instead of sample
-
-    return days_decreased, mean, stdev
+    # shift value column
+    df = df.select(
+        "date",
+        pl.col("value").shift(-1)
+        )
+    
+    # call summarize_pattern
+    return summarize_pattern(pattern, df)
 
 
-def evaluate_pattern(pattern: list, df: pd.DataFrame):
+def evaluate_pattern(pattern: list, df: pl.DataFrame) -> bool:
     """Evaluated whether a pattern is 'good' or 'bad'
 
     Parameters:
         pattern(list): list of dates
-        df(DataFrame): stock price data with columns[Date, percent_chg]
+        df(DataFrame): stock price data with columns[date, value]
 
     Returns:
         evaluation(boolean): if the pattern is 'good'
@@ -179,16 +192,17 @@ def evaluate_pattern(pattern: list, df: pd.DataFrame):
     return True
 
 
-def find_good_patterns(df: pd.DataFrame):
+def find_good_patterns(df: pl.DataFrame) -> list:
     """Find patterns in stock prices.
 
     Parameters:
-        df(DataFrame): stock price data with columns [Date, percent_chg]
+        df(DataFrame): stock price data with columns [date, value]
 
     Returns:
         good_patterns(list): patterns that have been evaluated as 'good'
     """
-    possible_patterns = generate_possible_patterns(df)
+    dates = df["date"]
+    possible_patterns = generate_possible_patterns(dates)
 
     good_patterns = []
     for pattern in possible_patterns:
