@@ -53,7 +53,6 @@ def test_convert_to_percentage():
     assert np.isclose(percent_df["NVDA"][0], -0.14529914529914525)
 
 
-
 def test_generate_pattern_from_date():
     # load and clean data
     df = load_test_df()
@@ -130,7 +129,21 @@ def test_evaluate_pattern():
     # setup
     df = load_test_df(full=True)
     df = df.select("date", pl.col("NVDA").alias("value"))
-    pattern = [date(2021, 2, 16), date(2021, 5, 17), date(2021, 8, 16), date(2021, 11, 16), date(2022, 2, 16), date(2022, 5, 16), date(2022, 8, 16), date(2022, 11, 16), date(2023, 2, 16), date(2023, 5, 16), date(2023, 8, 16), date(2023, 11, 16), date(2024, 2, 16)]
+    pattern = [
+        date(2021, 2, 16),
+        date(2021, 5, 17),
+        date(2021, 8, 16),
+        date(2021, 11, 16),
+        date(2022, 2, 16),
+        date(2022, 5, 16),
+        date(2022, 8, 16),
+        date(2022, 11, 16),
+        date(2023, 2, 16),
+        date(2023, 5, 16),
+        date(2023, 8, 16),
+        date(2023, 11, 16),
+        date(2024, 2, 16),
+    ]
 
     result = utils.evaluate_pattern(pattern, df)
 
@@ -151,16 +164,160 @@ def test_find_good_patterns():
 
 
 def test_prune_patterns():
-    # load and clean data, and find patterns
-    df = load_test_df(full=True)
-    df = utils.clean_df(df)
-    patterns = utils.find_good_patterns(df)
+    patterns = [
+        [
+            date(2021, 2, 16),
+            date(2021, 5, 17),
+            date(2021, 8, 16),
+            date(2021, 11, 16),
+            date(2022, 2, 16),
+            date(2022, 5, 16),
+            date(2022, 8, 16),
+            date(2022, 11, 16),
+            date(2023, 2, 16),
+            date(2023, 5, 16),
+            date(2023, 8, 16),
+            date(2023, 11, 16),
+            date(2024, 2, 16),
+        ],
+        [
+            date(2021, 2, 18),
+            date(2021, 5, 18),
+            date(2021, 8, 18),
+            date(2021, 11, 18),
+            date(2022, 2, 18),
+            date(2022, 5, 18),
+            date(2022, 8, 18),
+            date(2022, 11, 18),
+            date(2023, 2, 21),
+            date(2023, 5, 18),
+            date(2023, 8, 18),
+            date(2023, 11, 20),
+            date(2024, 2, 20),
+        ],
+        [
+            date(2021, 5, 17),
+            date(2021, 8, 16),
+            date(2021, 11, 16),
+            date(2022, 2, 16),
+            date(2022, 5, 16),
+            date(2022, 8, 16),
+            date(2022, 11, 16),
+            date(2023, 2, 16),
+            date(2023, 5, 16),
+            date(2023, 8, 16),
+            date(2023, 11, 16),
+            date(2024, 2, 16),
+        ],
+        [
+            date(2021, 5, 18),
+            date(2021, 8, 18),
+            date(2021, 11, 18),
+            date(2022, 2, 18),
+            date(2022, 5, 18),
+            date(2022, 8, 18),
+            date(2022, 11, 18),
+            date(2023, 2, 21),
+            date(2023, 5, 18),
+            date(2023, 8, 18),
+            date(2023, 11, 20),
+            date(2024, 2, 20),
+        ],
+        [
+            date(2021, 8, 16),
+            date(2021, 11, 16),
+            date(2022, 2, 16),
+            date(2022, 5, 16),
+            date(2022, 8, 16),
+            date(2022, 11, 16),
+            date(2023, 2, 16),
+            date(2023, 5, 16),
+            date(2023, 8, 16),
+            date(2023, 11, 16),
+            date(2024, 2, 16),
+        ],
+        [
+            date(2021, 11, 16),
+            date(2022, 2, 16),
+            date(2022, 5, 16),
+            date(2022, 8, 16),
+            date(2022, 11, 16),
+            date(2023, 2, 16),
+            date(2023, 5, 16),
+            date(2023, 8, 16),
+            date(2023, 11, 16),
+            date(2024, 2, 16),
+        ],
+        [
+            date(2022, 2, 16),
+            date(2022, 5, 16),
+            date(2022, 8, 16),
+            date(2022, 11, 16),
+            date(2023, 2, 16),
+            date(2023, 5, 16),
+            date(2023, 8, 16),
+            date(2023, 11, 16),
+            date(2024, 2, 16),
+        ],
+        [
+            date(2022, 2, 17),
+            date(2022, 5, 17),
+            date(2022, 8, 17),
+            date(2022, 11, 17),
+            date(2023, 2, 17),
+            date(2023, 5, 17),
+            date(2023, 8, 17),
+            date(2023, 11, 17),
+            date(2024, 2, 20),
+        ],
+        [
+            date(2022, 2, 18),
+            date(2022, 5, 18),
+            date(2022, 8, 18),
+            date(2022, 11, 18),
+            date(2023, 2, 21),
+            date(2023, 5, 18),
+            date(2023, 8, 18),
+            date(2023, 11, 20),
+            date(2024, 2, 20),
+        ],
+        [
+            date(2022, 5, 16),
+            date(2022, 8, 16),
+            date(2022, 11, 16),
+            date(2023, 2, 16),
+            date(2023, 5, 16),
+            date(2023, 8, 16),
+            date(2023, 11, 16),
+            date(2024, 2, 16),
+        ],
+        [
+            date(2022, 5, 17),
+            date(2022, 8, 17),
+            date(2022, 11, 17),
+            date(2023, 2, 17),
+            date(2023, 5, 17),
+            date(2023, 8, 17),
+            date(2023, 11, 17),
+            date(2024, 2, 20),
+        ],
+        [
+            date(2022, 5, 18),
+            date(2022, 8, 18),
+            date(2022, 11, 18),
+            date(2023, 2, 21),
+            date(2023, 5, 18),
+            date(2023, 8, 18),
+            date(2023, 11, 20),
+            date(2024, 2, 20),
+        ],
+    ]
 
     # prune patterns
     pruned_patterns = utils.prune_patterns(patterns)
 
     # test to ensure that the pattern starting on 2-16-2021 is found
-    assert any([pattern[0] == date(2021, 2, 16) for pattern in patterns])
+    assert any([pattern[0] == date(2021, 2, 16) for pattern in pruned_patterns])
 
     # test to ensure no dates are repeated in patterns
     all_dates = []

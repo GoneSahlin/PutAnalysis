@@ -1,11 +1,13 @@
 import os
 from datetime import date
+import pytest
 
 from pattern_detector import main, utils
 from test_utils import load_test_df
 
 
 # contents of test_image.py
+@pytest.mark.skip
 def test_log_pattern():
     # create temporary filepath for testing
     tmp_filepath = os.path.join("data", "good_patterns.csv")

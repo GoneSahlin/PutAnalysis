@@ -26,17 +26,14 @@ def clean_df(df: pd.DataFrame):
 
 def convert_to_percentage(df: pl.DataFrame):
     """Converts the df to percentage change for all but date column
-    
+
     Parameters:
         df(pl.DataFrame): has column date
 
     Returns:
         percent_df(pl.DataFrame): same columns as df
     """
-    percent_df = df.select(
-        pl.col("date"),
-        pl.all().exclude("date").pct_change()
-    )
+    percent_df = df.select(pl.col("date"), pl.all().exclude("date").pct_change())
 
     # drop first row
     percent_df = percent_df[1:]
@@ -147,11 +144,8 @@ def summarize_pattern_next_day(pattern: list, df: pl.DataFrame):
         stdev: standard deviation of percent_chg
     """
     # shift value column
-    df = df.select(
-        "date",
-        pl.col("value").shift(-1)
-        )
-    
+    df = df.select("date", pl.col("value").shift(-1))
+
     # call summarize_pattern
     return summarize_pattern(pattern, df)
 
@@ -173,12 +167,12 @@ def evaluate_pattern(pattern: list, df: pl.DataFrame) -> bool:
     if len(pattern) < 8:
         return False
 
-    # mean must be < 0
-    if mean >= 0.01:
+    # mean must be < -.02
+    if mean > -0.02:
         return False
 
     # percentage of days decreased must be >= .9
-    if days_decreased / len(pattern) <= 0.75:
+    if days_decreased / len(pattern) <= 0.65:
         return False
 
     # next days mean must also be < 0
@@ -186,7 +180,7 @@ def evaluate_pattern(pattern: list, df: pl.DataFrame) -> bool:
         return False
 
     # next days percentage of days decreased must be >= .75
-    if next_days_decreased / len(pattern) <= 0.75:
+    if next_days_decreased / len(pattern) <= 0.6:
         return False
 
     return True
