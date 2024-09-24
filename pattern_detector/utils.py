@@ -186,7 +186,7 @@ def evaluate_pattern(pattern: list, df: pl.DataFrame) -> bool:
     return True
 
 
-def find_good_patterns(df: pl.DataFrame) -> list:
+def find_good_patterns(df: pl.DataFrame, possible_patterns=None) -> list:
     """Find patterns in stock prices.
 
     Parameters:
@@ -196,7 +196,9 @@ def find_good_patterns(df: pl.DataFrame) -> list:
         good_patterns(list): patterns that have been evaluated as 'good'
     """
     dates = df["date"]
-    possible_patterns = generate_possible_patterns(dates)
+
+    if possible_patterns is None:
+        possible_patterns = generate_possible_patterns(dates)
 
     good_patterns = []
     for pattern in possible_patterns:

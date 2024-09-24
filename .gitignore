@@ -1,6 +1,7 @@
 # Project specific
 data/bronze/*
 data/silver/*
+data/gold/*
 
 # VS Code
 .vscode
